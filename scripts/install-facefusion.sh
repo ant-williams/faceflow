@@ -17,7 +17,7 @@ fi
 
 "$VENV/bin/pip" install --upgrade pip
 echo "Installing onnxruntime-gpu + FaceFusion dependencies ..."
-"$VENV/bin/python" "$FF_DIR/install.py" --onnxruntime cuda --skip-conda
+"$VENV/bin/python" "$FF_DIR/install.py" --onnxruntime cuda@12 --skip-conda
 
 echo
 echo "FaceFusion ready. GPU check:"
