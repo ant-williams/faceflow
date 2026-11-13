@@ -25,7 +25,7 @@ running this in any terminal — replace the two placeholders:
 
 ```bash
 curl -sS -X POST \
-  "https://rtc.live.cloudflare.com/v1/turn/keys/TURN_TOKEN_ID/credentials/generate" \
+  "https://rtc.live.cloudflare.com/v1/turn/keys/TURN_TOKEN_ID/credentials/generate-ice-servers" \
   -H "Authorization: Bearer API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"ttl": 86400}'
