@@ -8,14 +8,19 @@ FROM ghcr.io/selkies-project/nvidia-egl-desktop:${BASE_TAG}
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Google Chrome + what FaceFusion needs.
+# Tools FaceFusion needs, plus Google Chrome if the base image doesn't already
+# include it (current Selkies bases do).
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git ca-certificates wget gnupg ffmpeg x11-xserver-utils \
-    && wget -q -O- https://dl.google.com/linux/linux_signing_key.pub \
-        | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
-    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
-        > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update && apt-get install -y --no-install-recommends google-chrome-stable \
+    && if ! command -v google-chrome >/dev/null 2>&1; then \
+         if ! grep -rqs "dl.google.com/linux/chrome" /etc/apt/sources.list /etc/apt/sources.list.d/; then \
+           wget -q -O- https://dl.google.com/linux/linux_signing_key.pub \
+             | gpg --batch --yes --dearmor -o /usr/share/keyrings/google-chrome.gpg \
+           && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
+             > /etc/apt/sources.list.d/google-chrome.list; \
+         fi \
+         && apt-get update && apt-get install -y --no-install-recommends google-chrome-stable; \
+       fi \
     && rm -rf /var/lib/apt/lists/*
 
 # FaceFusion with CUDA, on its own Python 3.12 (via uv) so it doesn't depend on
