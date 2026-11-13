@@ -66,9 +66,10 @@ and MIG slices.
 
 ## Troubleshooting
 
-- **Port 8080 stays "not ready" but the pod logs show the desktop starting:**
-  Selkies is only listening inside the pod. The image sets `SELKIES_PUBLIC=true`;
-  on an older image, add that env var to the pod.
+- **Port 8080 "not ready" or "waiting for service to respond":** Selkies must
+  listen on all interfaces over plain HTTP (RunPod's proxy adds HTTPS). The image
+  sets `SELKIES_PUBLIC=true` and `SELKIES_ENABLE_HTTPS=false`; on an older image,
+  add both env vars to the pod.
 
 - **"Waiting for stream" / `Peer connection failed`:** the browser log line
   `using TURN servers:` must show `turn.cloudflare.com`. If it shows the pod's

@@ -35,10 +35,11 @@ RUN mkdir -p /etc/xdg/autostart \
 COPY start-facefusion.sh /usr/local/bin/start-facefusion
 RUN chmod +x /usr/local/bin/start-facefusion
 
-# Listen on all interfaces so RunPod's proxy can reach port 8080 (Selkies
-# defaults to localhost only), stream over WebRTC (Selkies defaults to
-# WebSocket), and forward your microphone and webcam.
+# Serve plain HTTP on all interfaces so RunPod's proxy (which adds HTTPS itself)
+# can reach port 8080, stream over WebRTC (Selkies defaults to WebSocket), and
+# forward your microphone and webcam.
 ENV SELKIES_PUBLIC=true \
+    SELKIES_ENABLE_HTTPS=false \
     SELKIES_MODE=webrtc \
     SELKIES_MICROPHONE_ENABLED=true \
     SELKIES_MICROPHONE_ON_START=true \
