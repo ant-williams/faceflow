@@ -23,6 +23,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
        fi \
     && rm -rf /var/lib/apt/lists/*
 
+# Chrome's sandbox can't start in RunPod's unprivileged container, so Chrome
+# opens and closes immediately. Launch it without the sandbox, and without
+# relying on the container's small /dev/shm, from both the menu and terminal.
+RUN for f in /usr/share/applications/google-chrome*.desktop; do \
+      [ -f "$f" ] && sed -i -E 's#^(Exec=[^ ]*google-chrome[^ ]*)#\1 --no-sandbox --disable-dev-shm-usage#' "$f"; \
+    done; \
+    if [ -x /usr/bin/google-chrome-stable ]; then \
+      printf '#!/bin/sh\nexec /usr/bin/google-chrome-stable --no-sandbox --disable-dev-shm-usage "$@"\n' \
+        > /usr/local/bin/google-chrome \
+      && chmod +x /usr/local/bin/google-chrome; \
+    fi
+
 # FaceFusion with CUDA, on its own Python 3.12 (via uv) so it doesn't depend on
 # the base image's system Python. The venv is activated so the installer's pip
 # calls go into it.
