@@ -7,6 +7,9 @@ set -euo pipefail
 FF_DIR=/opt/facefusion
 VENV="$FF_DIR/venv"
 
+# Ensure the persistent workspace folders exist.
+/opt/faceflow/scripts/faceflow-init.sh || true
+
 if [ ! -x "$VENV/bin/python" ]; then
     echo "FaceFusion venv missing — running installer first..."
     /opt/faceflow/scripts/install-facefusion.sh

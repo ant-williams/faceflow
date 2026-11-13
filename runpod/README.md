@@ -45,43 +45,39 @@ In the RunPod console: **Templates → New Template**
 | Container Image | `docker.io/<your-username>/faceflow:latest` |
 | Registry Credentials | the Docker Hub credential you added above |
 | Container Disk | 20 GB |
-| Volume Disk | 50 GB |
+| Volume Disk | 20 GB (raise later if needed) |
 | Volume Mount Path | `/workspace` |
-| Expose HTTP Ports | `8080,7860` |
+| Expose HTTP Ports | `6901,7860` |
 
 ### Environment variables
 
 | Name | Value |
 |------|-------|
-| `SELKIES_ENABLE_BASIC_AUTH` | `true` |
-| `SELKIES_BASIC_AUTH_USER` | a username |
-| `SELKIES_BASIC_AUTH_PASSWORD` | a strong password |
-| `KASMVNC_ENABLE` | `true` **(required on RunPod)** |
+| `VNC_PW` | a strong password (desktop login) |
 
-> **Why `KASMVNC_ENABLE=true` is required on RunPod.** The default (WebRTC/Selkies)
-> transport needs a direct media path or a reachable TURN server, which RunPod's
-> HTTP-only proxy doesn't provide — the browser shows "Waiting for stream" and the
-> logs show `[webrtc] [ERROR] Peer connection failed`. KasmVNC streams over
-> HTTP/WebSocket on port 8080, so it works through the proxy. Trade-off: weaker
-> audio and slightly higher latency; webcam forwarding is not available either way.
-| `SELKIES_FRAMERATE` | `30` |
-| `SELKIES_VIDEO_BITRATE` | `8000` |
+The desktop username is always **`kasm_user`**. FaceFlow uses a **KasmVNC**
+desktop — the same HTTP/WebSocket streaming RunPod's official "RunPod Desktop"
+template uses — so it stays responsive through RunPod's proxy. No WebRTC, no
+TURN, no NVENC needed for the desktop.
 
-## 3. Pick a GPU — this matters
+## 3. Pick a GPU
 
-**Choose a GPU with a hardware video encoder (NVENC):**
-RTX 4090, RTX 3090, RTX A5000, A4000, L4, L40.
+The desktop stream does **not** need the GPU — only FaceFusion does. Any current
+NVIDIA GPU works. Best value from typical availability:
 
-**Avoid A100 / H100** — they have no NVENC, so the desktop stream falls back to the
-CPU and stutters.
+- **A40 (~$0.59/hr)** — cheapest, lots of VRAM. Good default.
+- **RTX 4090 (~$0.89/hr)** — fastest face-swapping.
+
+Avoid MIG slices (e.g. "PRO 6000 MIG") for FaceFusion if you want full GPU.
 
 ## 4. Deploy and connect
 
 1. Deploy the pod from the template (Community Cloud is cheaper for testing).
-2. Click **Connect → HTTP Service → port 8080**.
-3. Log in with the username/password you set. The Ubuntu desktop loads in the browser.
+2. Click **Connect → HTTP Service → port 6901**.
+3. Log in: user `kasm_user`, password = your `VNC_PW`. The desktop loads
+   (accept the self-signed certificate if the browser warns).
 4. Double-click the **FaceFusion** icon, or open a terminal and run
-   `/opt/faceflow/scripts/run-facefusion.sh`.
+   `/opt/faceflow/scripts/run-facefusion.sh`. Then open port 7860 for its UI.
 
 ## 5. Stop the pod when done
 
@@ -90,8 +86,8 @@ volume (models, inputs, outputs) persists; anything installed elsewhere does not
 
 ## Notes / limits
 
-- **Microphone:** forwarded by Selkies from your browser; should appear as a mic
-  inside the desktop. Allow mic access when the browser asks.
+- **Audio & microphone:** KasmVNC carries desktop sound to your browser and can
+  forward your mic. Allow audio/mic when the browser asks.
 - **Webcam into apps / live video calls:** a virtual camera device needs a kernel
   module (`v4l2loopback`) that RunPod containers can't load. Live
   webcam → FaceFusion → call app does **not** work directly here. Options:

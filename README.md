@@ -1,10 +1,10 @@
 # FaceFlow
 
 A GPU-powered Ubuntu desktop you control from your browser, with **FaceFusion**
-and **Chrome** preinstalled. Built on [Selkies](https://github.com/selkies-project)
-desktop streaming so the screen, sound, keyboard, mouse and microphone flow
-between your browser and the cloud container. Runs on **RunPod** or on your own
-**NVIDIA PC** from the same image.
+and **Chrome** preinstalled. Built on a **KasmVNC** desktop (the same
+HTTP/WebSocket streaming RunPod's official desktop template uses), so the screen,
+sound, keyboard and mouse stay responsive through RunPod's proxy. Runs on
+**RunPod** or on your own **NVIDIA PC** from the same image.
 
 ## What you get
 
@@ -28,13 +28,13 @@ docker compose build
 docker compose up
 ```
 
-Open <https://localhost:8080> and log in. Double-click the **FaceFusion** desktop
-icon to start the UI.
+Open <https://localhost:6901> (accept the self-signed cert) and log in as
+`kasm_user` with your password. Double-click the **FaceFusion** desktop icon.
 
 ## Repository layout
 
 ```
-Dockerfile              # Selkies NVIDIA desktop + Chrome + FaceFusion
+Dockerfile              # KasmVNC desktop + Chrome + FaceFusion
 docker-compose.yml      # local testing on an NVIDIA PC
 .env.example            # config template (copy to .env)
 scripts/
@@ -61,10 +61,8 @@ containers (RunPod included) can't load. For live calls:
 
 ## Before you build
 
-- **Pin the base image tag.** `BASE_TAG` in `.env` / the Dockerfile must be a real
-  tag from the [Selkies NVIDIA EGL desktop](https://github.com/selkies-project/docker-nvidia-egl-desktop)
-  registry whose CUDA version is ≤ your host GPU driver. The default is a
-  placeholder — check for a current tag.
+- **Base image tag.** `BASE_TAG` is a [Kasm workspace core tag](https://hub.docker.com/r/kasmweb/core-ubuntu-jammy/tags).
+  The default should work; bump it if you want a newer Kasm.
 - GPU is not needed to build, only to run.
 
 ## Responsible use
