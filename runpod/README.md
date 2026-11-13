@@ -1,8 +1,30 @@
 # Running FaceFlow on RunPod
 
-## 1. Build and push the image
+## 1. Get the image into a registry
 
-RunPod pulls from a registry, so build and push first (from any machine with Docker):
+RunPod pulls a prebuilt image from a registry; it does not build from this repo.
+
+### No Docker on your machine? Let GitHub build it (recommended)
+
+This repo has a GitHub Actions workflow that builds the image in GitHub's cloud
+and publishes it to GitHub's registry (ghcr.io). No local Docker needed.
+
+1. Push this branch to GitHub (already done) — the build starts automatically.
+   You can also trigger it from the repo's **Actions** tab → *Build FaceFlow
+   image* → **Run workflow**.
+2. Wait for the green check (the build takes a while — it's a big image).
+3. The image is published as:
+
+   ```
+   ghcr.io/ant-williams/faceflow:latest
+   ```
+
+4. **Make the package public** so RunPod can pull it without a login:
+   your GitHub profile → **Packages** → `faceflow` → **Package settings** →
+   **Change visibility → Public**.
+   (Or keep it private and give RunPod registry credentials in the template.)
+
+### Have Docker locally? Build and push yourself instead
 
 ```bash
 docker build -t YOUR_DOCKERHUB_USER/faceflow:latest .
@@ -17,7 +39,7 @@ In the RunPod console: **Templates → New Template**
 
 | Field | Value |
 |-------|-------|
-| Container Image | `YOUR_DOCKERHUB_USER/faceflow:latest` |
+| Container Image | `ghcr.io/ant-williams/faceflow:latest` (or your Docker Hub image) |
 | Container Disk | 20 GB |
 | Volume Disk | 50 GB |
 | Volume Mount Path | `/workspace` |
