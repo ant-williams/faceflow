@@ -10,8 +10,8 @@ microphone and webcam.
 | File | What it is |
 |------|-----------|
 | `Dockerfile` | The image: Selkies desktop + FaceFusion |
-| `start-facefusion.sh` | Starts FaceFusion on port 7860 (`start-facefusion` in the desktop terminal) |
-| `selkies-wrapper.py` | Lets this pod's RunPod web address connect to Selkies |
+| `start-facefusion.sh` | Starts FaceFusion on port 7860 (runs automatically) |
+| `selkies-wrapper.py` | Runs at pod start: allows this pod's RunPod address and starts FaceFusion |
 | `.github/workflows/build.yml` | Builds the image and pushes it to Docker Hub — **manual only** |
 
 ## 1. Build the image
@@ -62,7 +62,8 @@ and MIG slices.
 
 1. **Connect → HTTP 8080**, log in with your basic-auth user/password.
 2. Allow the browser's microphone and camera prompts.
-3. In the desktop terminal run `start-facefusion`, then open **Connect → HTTP 7860**.
+3. Open **Connect → HTTP 7860** for FaceFusion. It starts by itself; the first
+   start downloads models for a few minutes (progress in `~/facefusion.log`).
 4. **Stop the pod** when done — it bills by the hour.
 
 ## Troubleshooting
