@@ -13,7 +13,6 @@ FROM kasmweb/core-ubuntu-jammy:${BASE_TAG}
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # ---------------------------------------------------------------------------
 # 1. System packages + Google Chrome
@@ -42,8 +41,8 @@ RUN git clone --depth 1 --branch ${FACEFUSION_VERSION} \
         https://github.com/facefusion/facefusion.git /opt/facefusion \
     && python3 -m venv /opt/facefusion/venv \
     && /opt/facefusion/venv/bin/pip install --no-cache-dir --upgrade pip
-RUN /opt/facefusion/venv/bin/python /opt/facefusion/install.py \
-        cuda@12 --skip-conda || \
+RUN . /opt/facefusion/venv/bin/activate && \
+    python /opt/facefusion/install.py cuda@12 --skip-conda || \
     echo "WARNING: facefusion install at build time failed; run scripts/install-facefusion.sh in the pod"
 # Give the desktop user ownership so FaceFusion can write models without root.
 RUN chown -R 1000:0 /opt/facefusion && chmod -R g+w /opt/facefusion

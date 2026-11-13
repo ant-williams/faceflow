@@ -3,8 +3,6 @@
 # Run this inside the pod if the build-time install was skipped or failed.
 set -euo pipefail
 
-export PIP_BREAK_SYSTEM_PACKAGES=1
-
 FF_DIR=/opt/facefusion
 VENV="$FF_DIR/venv"
 
@@ -17,9 +15,13 @@ if [ ! -d "$VENV" ]; then
     python3 -m venv "$VENV"
 fi
 
-"$VENV/bin/pip" install --upgrade pip
+# Activate the venv so FaceFusion's install.py calls the venv's pip (its bare
+# `pip`/`python` would otherwise hit the Debian system Python and clash).
+# shellcheck disable=SC1091
+. "$VENV/bin/activate"
+pip install --upgrade pip
 echo "Installing onnxruntime-gpu + FaceFusion dependencies ..."
-"$VENV/bin/python" "$FF_DIR/install.py" cuda@12 --skip-conda
+python "$FF_DIR/install.py" cuda@12 --skip-conda
 
 echo
 echo "FaceFusion ready. GPU check:"
