@@ -24,6 +24,8 @@ RUN git clone --depth 1 https://github.com/facefusion/facefusion.git /opt/facefu
     && cd /opt/facefusion \
     && . venv/bin/activate \
     && python install.py cuda@12 --skip-conda \
+    && pip install --no-cache-dir nvidia-cuda-runtime-cu12 nvidia-cublas-cu12 \
+        nvidia-cudnn-cu12 nvidia-cufft-cu12 nvidia-curand-cu12 \
     && chown -R 1000:1000 /opt/facefusion
 
 # Turn off keyboard auto-repeat at login so a delayed key release over the
