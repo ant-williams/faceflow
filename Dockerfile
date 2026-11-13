@@ -42,8 +42,9 @@ COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /usr/local/bin/uv
 ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python
 RUN git clone --depth 1 https://github.com/facefusion/facefusion.git /opt/facefusion \
     && uv venv --seed --python 3.12 /opt/facefusion/venv \
-    && . /opt/facefusion/venv/bin/activate \
-    && python /opt/facefusion/install.py cuda@12 --skip-conda \
+    && cd /opt/facefusion \
+    && . venv/bin/activate \
+    && python install.py cuda@12 --skip-conda \
     && chown -R 1000:1000 /opt/facefusion
 
 # Turn off keyboard auto-repeat so a delayed key release over the stream doesn't
