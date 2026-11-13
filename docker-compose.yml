@@ -17,6 +17,10 @@ services:
       - SELKIES_BASIC_AUTH_USER=${FACEFLOW_USER:-user}
       - SELKIES_BASIC_AUTH_PASSWORD=${FACEFLOW_PASSWORD:?set FACEFLOW_PASSWORD in .env}
       - SELKIES_ENABLE_BASIC_AUTH=true
+      # KasmVNC transport (HTTP/WebSocket). Required on hosts that only expose
+      # HTTP ports (RunPod), where WebRTC peer connections fail. Set false to
+      # use WebRTC/Selkies (needs host networking or a reachable TURN server).
+      - KASMVNC_ENABLE=${KASMVNC_ENABLE:-true}
       # Bitrate/framerate tuning for the stream:
       - SELKIES_FRAMERATE=${SELKIES_FRAMERATE:-30}
       - SELKIES_VIDEO_BITRATE=${SELKIES_VIDEO_BITRATE:-8000}

@@ -56,6 +56,14 @@ In the RunPod console: **Templates → New Template**
 | `SELKIES_ENABLE_BASIC_AUTH` | `true` |
 | `SELKIES_BASIC_AUTH_USER` | a username |
 | `SELKIES_BASIC_AUTH_PASSWORD` | a strong password |
+| `KASMVNC_ENABLE` | `true` **(required on RunPod)** |
+
+> **Why `KASMVNC_ENABLE=true` is required on RunPod.** The default (WebRTC/Selkies)
+> transport needs a direct media path or a reachable TURN server, which RunPod's
+> HTTP-only proxy doesn't provide — the browser shows "Waiting for stream" and the
+> logs show `[webrtc] [ERROR] Peer connection failed`. KasmVNC streams over
+> HTTP/WebSocket on port 8080, so it works through the proxy. Trade-off: weaker
+> audio and slightly higher latency; webcam forwarding is not available either way.
 | `SELKIES_FRAMERATE` | `30` |
 | `SELKIES_VIDEO_BITRATE` | `8000` |
 
