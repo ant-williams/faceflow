@@ -20,23 +20,14 @@ Streams over WebRTC (Selkies) and forwards your microphone and webcam.
 
 Nothing builds unless you run it.
 
-## 2. Get Cloudflare TURN credentials
+## 2. Get a Cloudflare TURN key
 
 RunPod has no inbound UDP, so WebRTC needs a TURN relay. Cloudflare's is free
-up to 1,000 GB/month.
+up to 1,000 GB/month, and Selkies generates the credentials from your key by
+itself — nothing to renew.
 
-1. dash.cloudflare.com → **Realtime → TURN** → create a key. Copy the
-   **Key ID** (not your account ID) and the **API Token**.
-2. Generate credentials (valid 24 h), in Windows PowerShell:
-
-   ```powershell
-   Invoke-RestMethod -Method Post `
-     -Uri "https://rtc.live.cloudflare.com/v1/turn/keys/KEY_ID/credentials/generate-ice-servers" `
-     -Headers @{ Authorization = "Bearer API_TOKEN" } `
-     -ContentType "application/json" -Body '{"ttl": 86400}' | ConvertTo-Json -Depth 5
-   ```
-
-3. Keep the `username` and `credential` from the output.
+dash.cloudflare.com → **Realtime → TURN** → create a key. Copy the **Key ID**
+(not your account ID) and the **API Token** (shown only once).
 
 ## 3. RunPod template
 
@@ -55,11 +46,11 @@ Environment variables:
 | `SELKIES_ENABLE_BASIC_AUTH` | `true` |
 | `SELKIES_BASIC_AUTH_USER` | your login name |
 | `SELKIES_BASIC_AUTH_PASSWORD` | your login password |
-| `SELKIES_TURN_HOST` | `turn.cloudflare.com` |
-| `SELKIES_TURN_PORT` | `3478` |
-| `SELKIES_TURN_PROTOCOL` | `udp` |
-| `SELKIES_TURN_USERNAME` | `username` from step 2 |
-| `SELKIES_TURN_PASSWORD` | `credential` from step 2 |
+| `SELKIES_ENABLE_CLOUDFLARE_TURN` | `true` |
+| `SELKIES_CLOUDFLARE_TURN_TOKEN_ID` | Key ID from step 2 |
+| `SELKIES_CLOUDFLARE_TURN_API_TOKEN` | API Token from step 2 |
+
+Remove any old `SELKIES_TURN_HOST/PORT/PROTOCOL/USERNAME/PASSWORD` variables.
 
 Pick a GPU with a video encoder: RTX A6000, RTX 4090, L40S. Avoid A100/H100/B200
 and MIG slices.
@@ -73,8 +64,9 @@ and MIG slices.
 
 ## Troubleshooting
 
-- **"Waiting for stream" / `Peer connection failed`:** TURN credentials expired
-  (they last 24 h) or are wrong. Generate new ones and update the env vars.
+- **"Waiting for stream" / `Peer connection failed`:** check the Cloudflare Key
+  ID and API Token. A 32-character ID that fails is often your account ID by
+  mistake.
 - **No mic/camera prompt:** check the running Selkies has the settings:
   ```bash
   for p in $(pgrep -f selkies); do tr '\0' '\n' < /proc/$p/environ | grep -iE 'MICRO|WEBCAM'; done
