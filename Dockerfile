@@ -44,6 +44,8 @@ RUN git clone --depth 1 --branch ${FACEFUSION_VERSION} \
 RUN /opt/facefusion/venv/bin/python /opt/facefusion/install.py \
         --onnxruntime cuda --skip-conda || \
     echo "WARNING: facefusion install at build time failed; run scripts/install-facefusion.sh in the pod"
+# Give the desktop user ownership so FaceFusion can write models without root.
+RUN chown -R 1000:0 /opt/facefusion && chmod -R g+w /opt/facefusion
 
 # ---------------------------------------------------------------------------
 # 3. FaceFlow helper scripts + a desktop launcher for the Kasm user

@@ -3,18 +3,20 @@
 # Creates the persistent folders on the mounted volume (/workspace).
 set -euo pipefail
 
-WORKSPACE=${WORKSPACE:-/workspace}
-FF_DATA="$WORKSPACE/facefusion"
-
-# RunPod mounts /workspace as root. If we can't write to it, take ownership
-# (via sudo if we're not root). Harmless if already owned by us.
-if [ ! -w "$WORKSPACE" ]; then
-    if [ "$(id -u)" = "0" ]; then
-        chown -R "$(id -u)":"$(id -g)" "$WORKSPACE" 2>/dev/null || true
-    elif command -v sudo >/dev/null 2>&1; then
-        sudo chown -R "$(id -u)":"$(id -g)" "$WORKSPACE" 2>/dev/null || true
-    fi
+# Choose a writable workspace. Prefer /workspace (a mounted volume) when it
+# exists and is writable; otherwise fall back to the user's home, since this
+# image can run unprivileged (no real root to create/chown /workspace).
+if [ -n "${WORKSPACE:-}" ]; then
+    :
+elif [ -d /workspace ] && [ -w /workspace ]; then
+    WORKSPACE=/workspace
+elif [ -d /workspace ] && [ "$(id -u)" = "0" ]; then
+    chown -R "$(id -u)":"$(id -g)" /workspace 2>/dev/null || true
+    WORKSPACE=/workspace
+else
+    WORKSPACE="$HOME/faceflow-data"
 fi
+FF_DATA="$WORKSPACE/facefusion"
 
 mkdir -p \
     "$FF_DATA/models" \
