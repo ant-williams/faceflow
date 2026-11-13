@@ -46,14 +46,15 @@ RUN test -f /usr/local/bin/selkies \
 
 # Serve plain HTTP on all interfaces so RunPod's proxy (which adds HTTPS itself)
 # can reach port 8080, stream over WebRTC (Selkies defaults to WebSocket), and
-# forward your microphone and webcam.
+# forward your microphone and webcam (H.264, which browsers encode in hardware).
 ENV SELKIES_PUBLIC=true \
     SELKIES_ENABLE_HTTPS=false \
     SELKIES_MODE=webrtc \
     SELKIES_MICROPHONE_ENABLED=true \
     SELKIES_MICROPHONE_ON_START=true \
     SELKIES_WEBCAM_ENABLED=true \
-    SELKIES_WEBCAM_ON_START=true
+    SELKIES_WEBCAM_ON_START=true \
+    SELKIES_WEBCAM_ENCODER=h264
 
 EXPOSE 8080 7860
 USER 1000
