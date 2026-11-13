@@ -101,6 +101,10 @@ and MIG slices.
   ```bash
   LD_PRELOAD=/usr/lib/x86_64-linux-gnu/selkies_v4l2_interposer.so /opt/facefusion/venv/bin/python -c "import cv2; c=cv2.VideoCapture(0); print('opened:', c.isOpened(), 'frame:', c.read()[0])"
   ```
+- **Black desktop, or no camera picture, after connecting:** the image uses HEVC
+  (H.265) for the desktop and camera. If your browser can't send or receive it
+  over WebRTC, set `SELKIES_ENCODER=h264enc` (desktop) and/or
+  `SELKIES_WEBCAM_ENCODER=h264` (camera) on the pod.
 - **Holding a key doesn't repeat:** key auto-repeat is turned off on purpose so
   stream delay can't type runs of characters. Turn it back on with `xset r on`.
 
