@@ -14,6 +14,18 @@ sound, keyboard and mouse stay responsive through RunPod's proxy. Runs on
 - Mic forwarding from your browser into the desktop
 - A persistent `/workspace` for models, inputs and outputs
 
+## Two variants (same repo, two image tags)
+
+| Tag | Transport | Feel | Audio | Extra setup | Use when |
+|-----|-----------|------|-------|-------------|----------|
+| `:kasmvnc` | HTTP/WebSocket (KasmVNC) | Snappy on RunPod | OK | None | Default — always works |
+| `:selkies` | WebRTC (Selkies) | Fastest + lowest latency | Best | Cloudflare TURN (free) | You want the smoothest desktop |
+
+- KasmVNC is the same streaming RunPod's own desktop uses — reliable anywhere.
+- Selkies/WebRTC needs an **external TURN server** on RunPod (no inbound UDP).
+  Use **Cloudflare TURN** (free to 1,000 GB/mo) — setup in
+  [`runpod/selkies-turn.md`](runpod/selkies-turn.md). No webcam either way on RunPod.
+
 ## Quick start
 
 ### On RunPod

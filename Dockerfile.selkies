@@ -1,0 +1,63 @@
+# FaceFlow (Selkies / WebRTC variant) — fast, low-latency GPU desktop with audio.
+#
+# Streams over WebRTC. On RunPod (no inbound UDP), it needs an EXTERNAL TURN
+# server — use Cloudflare TURN (free up to 1,000 GB/mo). Pass TURN credentials
+# as env vars at deploy time (see runpod/selkies-turn.md).
+#
+# Base: Selkies NVIDIA EGL desktop (Ubuntu + XFCE + NVENC + WebRTC).
+#   Serves on port 8080. Tags:
+#   https://github.com/selkies-project/docker-nvidia-egl-desktop/pkgs/container/nvidia-egl-desktop
+ARG BASE_TAG=24.04-20260810151405
+FROM ghcr.io/selkies-project/nvidia-egl-desktop:${BASE_TAG}
+
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+
+# ---------------------------------------------------------------------------
+# 1. System packages + Google Chrome
+# ---------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git git-lfs curl wget ca-certificates gnupg \
+        ffmpeg libgl1 libglib2.0-0 \
+        python3 python3-pip python3-venv \
+        fonts-liberation xdg-utils \
+    && install -d -m 0755 /etc/apt/keyrings \
+    && wget -q -O- https://dl.google.com/linux/linux_signing_key.pub \
+        | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] \
+        http://dl.google.com/linux/chrome/deb/ stable main" \
+        > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update && apt-get install -y --no-install-recommends google-chrome-stable \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------------------------
+# 2. FaceFusion (onnxruntime-gpu via pip; GPU provided by the host driver)
+# ---------------------------------------------------------------------------
+ARG FACEFUSION_VERSION=master
+RUN git clone --depth 1 --branch ${FACEFUSION_VERSION} \
+        https://github.com/facefusion/facefusion.git /opt/facefusion \
+    && python3 -m venv /opt/facefusion/venv \
+    && /opt/facefusion/venv/bin/pip install --no-cache-dir --upgrade pip
+RUN /opt/facefusion/venv/bin/python /opt/facefusion/install.py \
+        --onnxruntime cuda --skip-conda || \
+    echo "WARNING: facefusion install at build time failed; run scripts/install-facefusion.sh in the pod"
+
+# ---------------------------------------------------------------------------
+# 3. FaceFlow scripts + autostart (XFCE) + desktop launcher
+# ---------------------------------------------------------------------------
+COPY scripts/ /opt/faceflow/scripts/
+RUN chmod +x /opt/faceflow/scripts/*.sh && mkdir -p /etc/xdg/autostart && \
+    printf '%s\n' \
+      '[Desktop Entry]' \
+      'Type=Application' \
+      'Name=FaceFlow Init' \
+      'Exec=/opt/faceflow/scripts/faceflow-init.sh' \
+      'X-GNOME-Autostart-enabled=true' \
+      'NoDisplay=true' \
+      > /etc/xdg/autostart/faceflow-init.desktop
+
+ENV FACEFUSION_HOME=/workspace/facefusion
+
+EXPOSE 8080
+EXPOSE 7860
+USER 1000
