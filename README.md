@@ -1,6 +1,7 @@
 # FaceFlow
 
-A GPU Ubuntu desktop in your browser on RunPod, with FaceFusion and Chrome.
+A GPU desktop in your browser on RunPod (Selkies desktop 2.2.1, Ubuntu 26.04)
+with FaceFusion, Chrome and Firefox.
 Streams over WebRTC (Selkies) through a Cloudflare TURN relay and forwards your
 microphone and webcam.
 
@@ -8,7 +9,7 @@ microphone and webcam.
 
 | File | What it is |
 |------|-----------|
-| `Dockerfile` | The image: Selkies desktop + Chrome + FaceFusion |
+| `Dockerfile` | The image: Selkies desktop + FaceFusion |
 | `start-facefusion.sh` | Starts FaceFusion on port 7860 (`start-facefusion` in the desktop terminal) |
 | `.github/workflows/build.yml` | Builds the image and pushes it to Docker Hub — **manual only** |
 
@@ -65,18 +66,29 @@ and MIG slices.
 
 ## Troubleshooting
 
-- **"Waiting for stream" / `Peer connection failed`:** check the Cloudflare Key
-  ID and API Token. A 32-character ID that fails is often your account ID by
-  mistake.
+- **"Waiting for stream" / `Peer connection failed`:** the browser log line
+  `using TURN servers:` must show `turn.cloudflare.com`. If it shows the pod's
+  own IP, the Cloudflare key isn't being used — check the Key ID (a 32-character
+  ID that fails is often your account ID) and API Token. Fallback: generate
+  credentials yourself (valid 24 h) and set `SELKIES_TURN_HOST=turn.cloudflare.com`,
+  `SELKIES_TURN_PORT=3478`, `SELKIES_TURN_PROTOCOL=udp`, `SELKIES_TURN_USERNAME`,
+  `SELKIES_TURN_PASSWORD` instead of the three Cloudflare variables:
+  ```powershell
+  Invoke-RestMethod -Method Post `
+    -Uri "https://rtc.live.cloudflare.com/v1/turn/keys/KEY_ID/credentials/generate-ice-servers" `
+    -Headers @{ Authorization = "Bearer API_TOKEN" } `
+    -ContentType "application/json" -Body '{"ttl": 86400}' | ConvertTo-Json -Depth 5
+  ```
 - **No mic/camera prompt:** check the running Selkies has the settings:
   ```bash
   for p in $(pgrep -f selkies); do tr '\0' '\n' < /proc/$p/environ | grep -iE 'MICRO|WEBCAM'; done
   ```
   No output means the pod runs an old image — rebuild and redeploy.
 - **An app can't see the camera:** Selkies provides the camera through an
-  `LD_PRELOAD` interposer, so it only reaches apps started with it loaded.
-  Check `echo "$LD_PRELOAD"` in the terminal you launch FaceFusion from.
-
+  `LD_PRELOAD` interposer. `start-facefusion` loads it for FaceFusion. Test it:
+  ```bash
+  LD_PRELOAD=/usr/lib/selkies_v4l2_interposer.so /opt/facefusion/venv/bin/python -c "import cv2; c=cv2.VideoCapture(0); print('opened:', c.isOpened(), 'frame:', c.read()[0])"
+  ```
 - **Holding a key doesn't repeat:** key auto-repeat is turned off on purpose so
   stream delay can't type runs of characters. Turn it back on with `xset r on`.
 
