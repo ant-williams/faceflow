@@ -8,7 +8,7 @@ services:
     build:
       context: .
       args:
-        BASE_TAG: ${BASE_TAG:-24.04-20250101}
+        BASE_TAG: ${BASE_TAG:-24.04-20260810151405}
     image: faceflow:latest
     ports:
       - "8080:8080"   # Selkies desktop (browser)

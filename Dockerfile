@@ -8,7 +8,7 @@
 # NOTE: pin a real, existing tag before building. Check the tags here:
 #   https://github.com/selkies-project/docker-nvidia-egl-desktop/pkgs/container/nvidia-egl-desktop
 # The CUDA suffix must match (or be older than) the host driver on your pod.
-ARG BASE_TAG=24.04-20250101
+ARG BASE_TAG=24.04-20260810151405
 FROM ghcr.io/selkies-project/nvidia-egl-desktop:${BASE_TAG}
 
 # The base image runs as a non-root user ("ubuntu"); become root to install.
