@@ -16,7 +16,7 @@ Streams over WebRTC (Selkies) and forwards your microphone and webcam.
 1. Repo secrets (Settings → Secrets and variables → Actions):
    `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (Read/Write).
 2. **Actions → Build FaceFlow image → Run workflow.**
-3. Result: `docker.io/<your-username>/faceflow:selkies`.
+3. Result: `docker.io/<your-username>/faceflow:latest`.
 
 Nothing builds unless you run it.
 
@@ -42,7 +42,7 @@ up to 1,000 GB/month.
 
 | Field | Value |
 |-------|-------|
-| Container image | `docker.io/<your-username>/faceflow:selkies` |
+| Container image | `docker.io/<your-username>/faceflow:latest` |
 | Registry credentials | your Docker Hub login (read-only token is enough) |
 | Container disk | 20 GB |
 | Volume | 20 GB at `/workspace` (keeps FaceFusion's models) |
