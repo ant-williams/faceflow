@@ -1,7 +1,7 @@
 name: Build FaceFlow image
 
 # Manual only: Actions tab -> "Build FaceFlow image" -> Run workflow.
-# Pushes docker.io/<DOCKERHUB_USERNAME>/faceflow:latest
+# Pushes docker.io/<DOCKERHUB_USERNAME>/faceflow:selkies
 # Needs repo secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN.
 
 on:
@@ -31,4 +31,4 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/faceflow:latest
+          tags: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/faceflow:selkies
