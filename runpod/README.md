@@ -1,37 +1,40 @@
 # Running FaceFlow on RunPod
 
-## 1. Get the image into a registry
+## 1. Build the image (GitHub Actions → Docker Hub private)
 
 RunPod pulls a prebuilt image from a registry; it does not build from this repo.
+GitHub Actions builds it for free and pushes it to your **private Docker Hub**
+repo. No local Docker needed.
 
-### No Docker on your machine? Let GitHub build it (recommended)
+### One-time setup
 
-This repo has a GitHub Actions workflow that builds the image in GitHub's cloud
-and publishes it to GitHub's registry (ghcr.io). No local Docker needed.
+1. **Docker Hub account** at hub.docker.com (free — includes 1 private repo).
+2. **Access token:** Docker Hub → **Account Settings → Personal access tokens →
+   Generate new token** (Read/Write). Copy it.
+3. **Add two GitHub secrets:** your repo → **Settings → Secrets and variables →
+   Actions → New repository secret**:
+   - `DOCKERHUB_USERNAME` = your Docker Hub username
+   - `DOCKERHUB_TOKEN` = the token from step 2
+4. (Optional) Pre-create a **private** repo named `faceflow` on Docker Hub. If you
+   skip this, the first push creates it — then set it to Private in its settings.
 
-1. Push this branch to GitHub (already done) — the build starts automatically.
-   You can also trigger it from the repo's **Actions** tab → *Build FaceFlow
-   image* → **Run workflow**.
-2. Wait for the green check (the build takes a while — it's a big image).
-3. The image is published as:
+### Run the build
 
-   ```
-   ghcr.io/ant-williams/faceflow:latest
-   ```
+- It runs automatically when you change the `Dockerfile` or `scripts/`.
+- Or trigger it manually: repo → **Actions** tab → *Build FaceFlow image* →
+  **Run workflow**.
+- Wait for the green check (the build takes a while — it's a big image).
 
-4. **Make the package public** so RunPod can pull it without a login:
-   your GitHub profile → **Packages** → `faceflow` → **Package settings** →
-   **Change visibility → Public**.
-   (Or keep it private and give RunPod registry credentials in the template.)
+The image is pushed to: `docker.io/<your-username>/faceflow:latest`
 
-### Have Docker locally? Build and push yourself instead
+### Let RunPod pull your private image
 
-```bash
-docker build -t YOUR_DOCKERHUB_USER/faceflow:latest .
-docker push YOUR_DOCKERHUB_USER/faceflow:latest
-```
+RunPod → **Settings → Container Registry Auth → Add Registry Credentials**:
+- Registry: `docker.io`
+- Username: your Docker Hub username
+- Password: the same Docker Hub access token
 
-(GPU is **not** needed to build — only to run.)
+Select this credential when you create the template below.
 
 ## 2. Create a RunPod template
 
@@ -39,7 +42,8 @@ In the RunPod console: **Templates → New Template**
 
 | Field | Value |
 |-------|-------|
-| Container Image | `ghcr.io/ant-williams/faceflow:latest` (or your Docker Hub image) |
+| Container Image | `docker.io/<your-username>/faceflow:latest` |
+| Registry Credentials | the Docker Hub credential you added above |
 | Container Disk | 20 GB |
 | Volume Disk | 50 GB |
 | Volume Mount Path | `/workspace` |
