@@ -35,6 +35,13 @@ RUN mkdir -p /etc/xdg/autostart \
 COPY start-facefusion.sh /usr/local/bin/start-facefusion
 RUN chmod +x /usr/local/bin/start-facefusion
 
+# Allow this pod's RunPod web address to open Selkies' streaming connection.
+COPY selkies-wrapper.py /tmp/selkies-wrapper.py
+RUN test -f /usr/local/bin/selkies \
+    && mv /usr/local/bin/selkies /usr/local/bin/selkies-real \
+    && install -m 755 /tmp/selkies-wrapper.py /usr/local/bin/selkies \
+    && rm /tmp/selkies-wrapper.py
+
 # Serve plain HTTP on all interfaces so RunPod's proxy (which adds HTTPS itself)
 # can reach port 8080, stream over WebRTC (Selkies defaults to WebSocket), and
 # forward your microphone and webcam.

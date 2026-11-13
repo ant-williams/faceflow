@@ -11,6 +11,7 @@ microphone and webcam.
 |------|-----------|
 | `Dockerfile` | The image: Selkies desktop + FaceFusion |
 | `start-facefusion.sh` | Starts FaceFusion on port 7860 (`start-facefusion` in the desktop terminal) |
+| `selkies-wrapper.py` | Lets this pod's RunPod web address connect to Selkies |
 | `.github/workflows/build.yml` | Builds the image and pushes it to Docker Hub — **manual only** |
 
 ## 1. Build the image
@@ -70,6 +71,11 @@ and MIG slices.
   listen on all interfaces over plain HTTP (RunPod's proxy adds HTTPS). The image
   sets `SELKIES_PUBLIC=true` and `SELKIES_ENABLE_HTTPS=false`; on an older image,
   add both env vars to the pod.
+- **Black screen, browser log shows the signaling WebSocket failing** and the pod
+  log says `Rejected WebSocket upgrade from disallowed Origin`: Selkies is
+  refusing RunPod's web address. The image allows it automatically from the pod
+  ID; on an older image, set
+  `SELKIES_ALLOWED_ORIGINS=https://<pod-id>-8080.proxy.runpod.net`.
 
 - **"Waiting for stream" / `Peer connection failed`:** the browser log line
   `using TURN servers:` must show `turn.cloudflare.com`. If it shows the pod's
