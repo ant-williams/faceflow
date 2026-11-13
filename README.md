@@ -66,10 +66,10 @@ runpod/README.md        # RunPod template + deploy guide
 | **Live webcam → FaceFusion → video call** | **No, not directly** — see below |
 
 A live virtual webcam needs the `v4l2loopback` kernel module, which cloud
-containers (RunPod included) can't load. For live calls:
-- run the call on **your own PC** and feed FaceFusion's output through **OBS
-  Virtual Camera**, or
-- use a **Vast.ai VM** (its own kernel allows `v4l2loopback`).
+containers (RunPod included) can't load. **For live camera + mic into FaceFusion,
+use a Vast.ai VM instance** — see [`vast/README.md`](vast/README.md). The mic
+works on RunPod too (`SELKIES_MICROPHONE_ENABLED=true`); only the camera needs
+the VM.
 
 ## Before you build
 
