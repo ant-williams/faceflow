@@ -57,8 +57,10 @@ RUN printf '[Keyboard]\nKeyRepeat=nothing\n' >> /etc/xdg/kcminputrc \
 COPY start-facefusion.sh /usr/local/bin/start-facefusion
 RUN chmod +x /usr/local/bin/start-facefusion
 
-# Forward your microphone and webcam into the desktop.
-ENV SELKIES_MICROPHONE_ENABLED=true \
+# Stream over WebRTC (the newer Selkies defaults to WebSocket), using the TURN
+# relay set in the pod's env vars, and forward your microphone and webcam.
+ENV SELKIES_MODE=webrtc \
+    SELKIES_MICROPHONE_ENABLED=true \
     SELKIES_MICROPHONE_ON_START=true \
     SELKIES_WEBCAM_ENABLED=true \
     SELKIES_WEBCAM_ON_START=true

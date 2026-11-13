@@ -1,7 +1,8 @@
 # FaceFlow
 
 A GPU Ubuntu desktop in your browser on RunPod, with FaceFusion and Chrome.
-Streams over WebRTC (Selkies) and forwards your microphone and webcam.
+Streams over WebRTC (Selkies) through a Cloudflare TURN relay and forwards your
+microphone and webcam.
 
 ## Files
 
