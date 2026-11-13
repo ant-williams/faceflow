@@ -15,6 +15,7 @@ import os
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.request
 
 TURN_API = os.environ.get("FACEFLOW_TURN_API", "https://rtc.live.cloudflare.com/v1/turn/keys")
@@ -51,14 +52,26 @@ def start_background(pid_file, marker, command, log_path):
         f.write(str(proc.pid))
 
 
-def write_turn_config(key_id, api_token, path):
+def write_turn_config(key_id, api_token, path, attempts=1):
+    # Cloudflare rejects Python's default User-Agent (HTTP 403, error 1010),
+    # so identify ourselves explicitly.
     request = urllib.request.Request(
         f"{TURN_API}/{key_id}/credentials/generate-ice-servers",
         data=json.dumps({"ttl": TURN_TTL}).encode(),
-        headers={"Authorization": f"Bearer {api_token}", "Content-Type": "application/json"},
+        headers={"Authorization": f"Bearer {api_token}", "Content-Type": "application/json",
+                 "User-Agent": "faceflow/1.0"},
         method="POST")
-    with urllib.request.urlopen(request, timeout=15) as response:
-        config = json.loads(response.read())
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=15) as response:
+                config = json.loads(response.read())
+            break
+        except urllib.error.HTTPError:
+            raise  # wrong key or token: retrying won't help
+        except Exception:
+            if attempt == attempts:
+                raise
+            time.sleep(5)  # network may not be ready yet at pod start
     if not config.get("iceServers"):
         raise ValueError("Cloudflare reply has no iceServers")
     # Selkies only trusts the file if it is ours, not a symlink, and not
@@ -97,7 +110,7 @@ api_token = os.environ.get("SELKIES_CLOUDFLARE_TURN_API_TOKEN")
 if key_id and api_token:
     rtc_path = os.environ.setdefault("SELKIES_RTC_CONFIG_JSON", "/tmp/rtc.json")
     try:
-        write_turn_config(key_id, api_token, rtc_path)
+        write_turn_config(key_id, api_token, rtc_path, attempts=4)
         os.environ["SELKIES_ENABLE_CLOUDFLARE_TURN"] = "false"  # skip Selkies' own outdated fetch
         log(f"Cloudflare TURN credentials written to {rtc_path}")
         start_background(os.path.join(RUNTIME_DIR, "faceflow-turn.pid"), b"--refresh-turn",
