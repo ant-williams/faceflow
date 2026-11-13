@@ -78,6 +78,14 @@ Templates → New Template:
 | `SELKIES_TURN_PASSWORD` | the **credential** from Step 2 |
 | `SELKIES_STUN_HOST` | `stun.cloudflare.com` |
 | `SELKIES_STUN_PORT` | `3478` |
+| `SELKIES_MICROPHONE_ENABLED` | `true` (forward your mic in) |
+| `SELKIES_MICROPHONE_ON_START` | `true` |
+
+> **Microphone** works on RunPod — it uses a userspace PulseAudio virtual source
+> (no kernel module). Set the two vars above, then **Allow** the browser's mic
+> prompt. **Webcam** does NOT work on RunPod: it needs a virtual V4L2 device
+> (`v4l2loopback` kernel module), which containers can't load. Use a Vast.ai VM
+> for live camera.
 
 > Env var names can differ between Selkies versions. If the stream still won't
 > connect, check the base image's docs for the exact TURN variable names
