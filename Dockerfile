@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Google Chrome + what FaceFusion needs.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git ca-certificates wget gnupg ffmpeg python3 python3-venv \
+        git ca-certificates wget gnupg ffmpeg x11-xserver-utils \
     && wget -q -O- https://dl.google.com/linux/linux_signing_key.pub \
         | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
@@ -18,14 +18,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update && apt-get install -y --no-install-recommends google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# FaceFusion with CUDA. The venv is activated so its installer's pip calls
-# install into the venv, not the system Python.
+# FaceFusion with CUDA, on its own Python 3.12 (via uv) so it doesn't depend on
+# the base image's system Python. The venv is activated so the installer's pip
+# calls go into it.
+COPY --from=ghcr.io/astral-sh/uv:0.8.0 /uv /usr/local/bin/uv
+ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python
 RUN git clone --depth 1 https://github.com/facefusion/facefusion.git /opt/facefusion \
-    && python3 -m venv /opt/facefusion/venv \
+    && uv venv --seed --python 3.12 /opt/facefusion/venv \
     && . /opt/facefusion/venv/bin/activate \
-    && pip install --no-cache-dir --upgrade pip \
     && python /opt/facefusion/install.py cuda@12 --skip-conda \
     && chown -R 1000:1000 /opt/facefusion
+
+# Turn off keyboard auto-repeat so a delayed key release over the stream doesn't
+# type a long run of characters.
+RUN printf '[Keyboard]\nKeyRepeat=nothing\n' >> /etc/xdg/kcminputrc \
+    && mkdir -p /etc/xdg/autostart \
+    && printf '[Desktop Entry]\nType=Application\nName=Disable key repeat\nExec=sh -c "xset r off"\nNoDisplay=true\n' \
+        > /etc/xdg/autostart/faceflow-no-key-repeat.desktop
 
 COPY start-facefusion.sh /usr/local/bin/start-facefusion
 RUN chmod +x /usr/local/bin/start-facefusion

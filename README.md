@@ -76,6 +76,9 @@ and MIG slices.
   `LD_PRELOAD` interposer, so it only reaches apps started with it loaded.
   Check `echo "$LD_PRELOAD"` in the terminal you launch FaceFusion from.
 
+- **Holding a key doesn't repeat:** key auto-repeat is turned off on purpose so
+  stream delay can't type runs of characters. Turn it back on with `xset r on`.
+
 ## Responsible use
 
 Only use faces you have permission to use, keep FaceFusion's content filter on,
