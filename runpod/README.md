@@ -88,8 +88,7 @@ volume (models, inputs, outputs) persists; anything installed elsewhere does not
 
 - **Audio & microphone:** KasmVNC carries desktop sound to your browser and can
   forward your mic. Allow audio/mic when the browser asks.
-- **Webcam into apps / live video calls:** a virtual camera device needs a kernel
-  module (`v4l2loopback`) that RunPod containers can't load. Live
-  webcam → FaceFusion → call app does **not** work directly here. Options:
-  run the call on your own PC with OBS Virtual Camera, or use a Vast.ai VM.
+- **Webcam:** the `:kasmvnc` image doesn't forward your camera. Use the
+  `:selkies` image instead — its V4L2 Interposer forwards your browser camera
+  without a kernel module (see `selkies-turn.md`).
 - First FaceFusion run downloads models into `/workspace` (a few GB) — give it time.

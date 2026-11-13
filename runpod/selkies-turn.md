@@ -78,14 +78,16 @@ Templates → New Template:
 | `SELKIES_TURN_PASSWORD` | the **credential** from Step 2 |
 | `SELKIES_STUN_HOST` | `stun.cloudflare.com` |
 | `SELKIES_STUN_PORT` | `3478` |
-| `SELKIES_MICROPHONE_ENABLED` | `true` (forward your mic in) |
-| `SELKIES_MICROPHONE_ON_START` | `true` |
+| `SELKIES_MICROPHONE_ENABLED` | `true` (already set in the image) |
+| `SELKIES_MICROPHONE_ON_START` | `true` (already set in the image) |
+| `SELKIES_WEBCAM_ENABLED` | `true` (already set in the image) |
+| `SELKIES_WEBCAM_ON_START` | `true` (already set in the image) |
 
-> **Microphone** works on RunPod — it uses a userspace PulseAudio virtual source
-> (no kernel module). Set the two vars above, then **Allow** the browser's mic
-> prompt. **Webcam** does NOT work on RunPod: it needs a virtual V4L2 device
-> (`v4l2loopback` kernel module), which containers can't load. Use a Vast.ai VM
-> for live camera.
+> **Mic and webcam** are both enabled in the `:selkies` image. The mic is a
+> userspace audio source; the webcam uses Selkies' rootless **V4L2 Interposer**,
+> which needs no `v4l2loopback` kernel module, so it can work on RunPod. On
+> connect, **Allow** the browser's microphone and camera prompts. Not yet tested
+> on a live pod — see Troubleshooting if apps don't see the camera.
 
 > Env var names can differ between Selkies versions. If the stream still won't
 > connect, check the base image's docs for the exact TURN variable names
@@ -106,7 +108,13 @@ Templates → New Template:
   (Step 2) and double-check the variable names.
 - **Connects but no audio:** confirm the browser allowed audio; check the Selkies
   sidebar audio toggle.
-- **Webcam into apps:** not available on RunPod (kernel-module limit) regardless
-  of TURN. Use a Vast.ai VM for that.
+- **No mic/camera toggle or browser prompt:** check the running Selkies process
+  actually has the settings:
+  `for p in $(pgrep -f selkies); do tr '\0' '\n' < /proc/$p/environ | grep -iE 'MICRO|WEBCAM'; done`
+  No output means the image is old — rebuild from this repo (base tag `latest`).
+- **Camera allowed but an app doesn't see it:** the app must open the camera
+  through the V4L2 Interposer. Check the socket exists:
+  `ls ${XDG_RUNTIME_DIR:-/tmp}/selkies_webcam0.sock`. Test in the desktop's
+  browser at webcammictest.com before trying FaceFusion's webcam mode.
 - **Bandwidth:** Cloudflare TURN is free to 1,000 GB/mo (~150–500 hours). Beyond
   that it's $0.05/GB.

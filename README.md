@@ -24,7 +24,8 @@ sound, keyboard and mouse stay responsive through RunPod's proxy. Runs on
 - KasmVNC is the same streaming RunPod's own desktop uses — reliable anywhere.
 - Selkies/WebRTC needs an **external TURN server** on RunPod (no inbound UDP).
   Use **Cloudflare TURN** (free to 1,000 GB/mo) — setup in
-  [`runpod/selkies-turn.md`](runpod/selkies-turn.md). No webcam either way on RunPod.
+  [`runpod/selkies-turn.md`](runpod/selkies-turn.md). Only `:selkies` forwards
+  your mic and camera.
 
 ## Quick start
 
@@ -62,14 +63,13 @@ runpod/README.md        # RunPod template + deploy guide
 |------|-------------|
 | Cloud desktop + apps | Yes |
 | FaceFusion on photos/videos (GPU) | Yes |
-| Microphone into the desktop | Yes (browser forwards it) |
-| **Live webcam → FaceFusion → video call** | **No, not directly** — see below |
+| Microphone into the desktop | Yes, with `:selkies` |
+| Your webcam into the desktop / FaceFusion | Expected yes with `:selkies` — not yet tested on a live pod |
 
-A live virtual webcam needs the `v4l2loopback` kernel module, which cloud
-containers (RunPod included) can't load. **For live camera + mic into FaceFusion,
-use a Vast.ai VM instance** — see [`vast/README.md`](vast/README.md). The mic
-works on RunPod too (`SELKIES_MICROPHONE_ENABLED=true`); only the camera needs
-the VM.
+The `:selkies` image enables mic and webcam forwarding. The webcam uses Selkies'
+rootless V4L2 Interposer, so it doesn't need the `v4l2loopback` kernel module
+that containers can't load. If it doesn't work for an app, the fallback is a
+Vast.ai VM instance — see [`vast/README.md`](vast/README.md).
 
 ## Before you build
 

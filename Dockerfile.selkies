@@ -4,10 +4,12 @@
 # server — use Cloudflare TURN (free up to 1,000 GB/mo). Pass TURN credentials
 # as env vars at deploy time (see runpod/selkies-turn.md).
 #
-# Base: Selkies NVIDIA EGL desktop (Ubuntu + XFCE + NVENC + WebRTC).
+# Base: Selkies NVIDIA EGL desktop (Ubuntu + KDE Plasma + NVENC + WebRTC).
+#   Uses `latest` for the current Selkies, which has mic forwarding and the
+#   rootless V4L2 Interposer webcam. Pin a dated tag once a build is confirmed.
 #   Serves on port 8080. Tags:
 #   https://github.com/selkies-project/docker-nvidia-egl-desktop/pkgs/container/nvidia-egl-desktop
-ARG BASE_TAG=24.04-20260810151405
+ARG BASE_TAG=latest
 FROM ghcr.io/selkies-project/nvidia-egl-desktop:${BASE_TAG}
 
 USER root
@@ -46,7 +48,7 @@ RUN . /opt/facefusion/venv/bin/activate && \
 RUN chown -R 1000:0 /opt/facefusion && chmod -R g+w /opt/facefusion
 
 # ---------------------------------------------------------------------------
-# 3. FaceFlow scripts + autostart (XFCE) + desktop launcher
+# 3. FaceFlow scripts + desktop-session autostart
 # ---------------------------------------------------------------------------
 COPY scripts/ /opt/faceflow/scripts/
 RUN chmod +x /opt/faceflow/scripts/*.sh && mkdir -p /etc/xdg/autostart && \
@@ -61,11 +63,14 @@ RUN chmod +x /opt/faceflow/scripts/*.sh && mkdir -p /etc/xdg/autostart && \
 
 ENV FACEFUSION_HOME=/workspace/facefusion
 
-# Microphone on by default (userspace PulseAudio virtual source — works on
-# RunPod). You still Allow the browser mic prompt on connect. Webcam stays off
-# because it needs a v4l2loopback device that RunPod containers can't create.
+# Microphone + webcam forwarding on by default. The mic is a userspace audio
+# virtual source; the webcam uses Selkies' rootless V4L2 Interposer, which needs
+# no v4l2loopback kernel module, so both work in unprivileged containers like
+# RunPod. The browser still asks for permission on connect.
 ENV SELKIES_MICROPHONE_ENABLED=true
 ENV SELKIES_MICROPHONE_ON_START=true
+ENV SELKIES_WEBCAM_ENABLED=true
+ENV SELKIES_WEBCAM_ON_START=true
 
 EXPOSE 8080
 EXPOSE 7860

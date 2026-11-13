@@ -1,8 +1,9 @@
 # FaceFlow on Vast.ai — live camera + microphone
 
-This is the setup that makes your **local webcam AND microphone** stream into
-FaceFusion, because a Vast.ai **VM instance** has real kernel access (so the
-virtual camera device `v4l2loopback` can be created — impossible on RunPod).
+Fallback setup. Try the `:selkies` image on RunPod first — its V4L2 Interposer
+forwards your camera without a kernel module. Use this Vast.ai **VM** setup only
+if an app can't see the camera through the interposer: a VM can load
+`v4l2loopback` and give apps a real `/dev/video0`.
 
 > **You MUST pick a VM instance, not a Docker instance.** On a plain Docker
 > instance the camera won't work (same limit as RunPod). The microphone works
