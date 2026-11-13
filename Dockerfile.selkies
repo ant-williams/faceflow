@@ -61,6 +61,12 @@ RUN chmod +x /opt/faceflow/scripts/*.sh && mkdir -p /etc/xdg/autostart && \
 
 ENV FACEFUSION_HOME=/workspace/facefusion
 
+# Microphone on by default (userspace PulseAudio virtual source — works on
+# RunPod). You still Allow the browser mic prompt on connect. Webcam stays off
+# because it needs a v4l2loopback device that RunPod containers can't create.
+ENV SELKIES_MICROPHONE_ENABLED=true
+ENV SELKIES_MICROPHONE_ON_START=true
+
 EXPOSE 8080
 EXPOSE 7860
 USER 1000
