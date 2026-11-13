@@ -11,7 +11,7 @@ microphone and webcam.
 |------|-----------|
 | `Dockerfile` | The image: Selkies desktop + FaceFusion |
 | `start-facefusion.sh` | Starts FaceFusion on port 7860 (runs automatically) |
-| `selkies-wrapper.py` | Runs at pod start: allows this pod's RunPod address and starts FaceFusion |
+| `selkies-wrapper.py` | Runs at pod start: allows this pod's RunPod address, sets up Cloudflare TURN, starts FaceFusion |
 | `.github/workflows/build.yml` | Builds the image and pushes it to Docker Hub — **manual only** |
 
 ## 1. Build the image
@@ -26,8 +26,8 @@ Nothing builds unless you run it.
 ## 2. Get a Cloudflare TURN key
 
 RunPod has no inbound UDP, so WebRTC needs a TURN relay. Cloudflare's is free
-up to 1,000 GB/month, and Selkies generates the credentials from your key by
-itself — nothing to renew.
+up to 1,000 GB/month. At start-up the image fetches credentials from your key
+and renews them every 12 hours — nothing to paste or renew yourself.
 
 dash.cloudflare.com → **Realtime → TURN** → create a key. Copy the **Key ID**
 (not your account ID) and the **API Token** (shown only once).
@@ -49,7 +49,6 @@ Environment variables:
 | `SELKIES_ENABLE_BASIC_AUTH` | `true` |
 | `SELKIES_BASIC_AUTH_USER` | your login name |
 | `SELKIES_BASIC_AUTH_PASSWORD` | your login password |
-| `SELKIES_ENABLE_CLOUDFLARE_TURN` | `true` |
 | `SELKIES_CLOUDFLARE_TURN_TOKEN_ID` | Key ID from step 2 |
 | `SELKIES_CLOUDFLARE_TURN_API_TOKEN` | API Token from step 2 |
 
@@ -80,8 +79,10 @@ and MIG slices.
 
 - **"Waiting for stream" / `Peer connection failed`:** the browser log line
   `using TURN servers:` must show `turn.cloudflare.com`. If it shows the pod's
-  own IP, the Cloudflare key isn't being used — check the Key ID (a 32-character
-  ID that fails is often your account ID) and API Token. Fallback: generate
+  own IP, the Cloudflare key isn't being used. The pod log shows either
+  `faceflow: Cloudflare TURN credentials written` or the reason it failed —
+  check the Key ID (a 32-character ID that fails is often your account ID) and
+  API Token. Fallback: generate
   credentials yourself (valid 24 h) and set `SELKIES_TURN_HOST=turn.cloudflare.com`,
   `SELKIES_TURN_PORT=3478`, `SELKIES_TURN_PROTOCOL=udp`, `SELKIES_TURN_USERNAME`,
   `SELKIES_TURN_PASSWORD` instead of the three Cloudflare variables:
