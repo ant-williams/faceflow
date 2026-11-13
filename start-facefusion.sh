@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start FaceFusion on port 7860 using the GPU.
+# Start FaceFusion on port 7860 using the GPU, with the normal and live-webcam screens.
 set -euo pipefail
 
 cd /opt/facefusion
@@ -11,4 +11,4 @@ if [ -w /workspace ] && [ ! -e .assets ]; then
 fi
 
 . venv/bin/activate
-exec python facefusion.py run --execution-providers cuda
+exec python facefusion.py run --execution-providers cuda --ui-layouts default webcam
