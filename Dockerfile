@@ -13,6 +13,7 @@ FROM kasmweb/core-ubuntu-jammy:${BASE_TAG}
 
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 
 # ---------------------------------------------------------------------------
 # 1. System packages + Google Chrome

@@ -3,6 +3,8 @@
 # Run this inside the pod if the build-time install was skipped or failed.
 set -euo pipefail
 
+export PIP_BREAK_SYSTEM_PACKAGES=1
+
 FF_DIR=/opt/facefusion
 VENV="$FF_DIR/venv"
 
