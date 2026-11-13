@@ -99,7 +99,7 @@ and MIG slices.
 - **An app can't see the camera:** Selkies provides the camera through an
   `LD_PRELOAD` interposer. `start-facefusion` loads it for FaceFusion. Test it:
   ```bash
-  LD_PRELOAD=/usr/lib/selkies_v4l2_interposer.so /opt/facefusion/venv/bin/python -c "import cv2; c=cv2.VideoCapture(0); print('opened:', c.isOpened(), 'frame:', c.read()[0])"
+  LD_PRELOAD=/usr/lib/x86_64-linux-gnu/selkies_v4l2_interposer.so /opt/facefusion/venv/bin/python -c "import cv2; c=cv2.VideoCapture(0); print('opened:', c.isOpened(), 'frame:', c.read()[0])"
   ```
 - **Holding a key doesn't repeat:** key auto-repeat is turned off on purpose so
   stream delay can't type runs of characters. Turn it back on with `xset r on`.

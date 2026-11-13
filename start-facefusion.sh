@@ -4,22 +4,16 @@ set -euo pipefail
 
 cd /opt/facefusion
 
-# Load Selkies' webcam interposer so FaceFusion sees your forwarded camera.
-for INTERPOSER in /usr/lib/selkies_v4l2_interposer.so \
-                  /usr/lib/x86_64-linux-gnu/selkies_v4l2_interposer.so \
-                  /opt/add-ons/usr/lib/selkies_v4l2_interposer.so; do
-    if [ -f "$INTERPOSER" ]; then
-        if [[ ":${LD_PRELOAD:-}:" != *":$INTERPOSER:"* ]]; then
+# Load Selkies' webcam interposer so FaceFusion sees your forwarded camera
+# (the desktop session usually preloads it already).
+if [[ "${LD_PRELOAD:-}" != *selkies_v4l2_interposer.so* ]]; then
+    for INTERPOSER in /usr/lib/x86_64-linux-gnu/selkies_v4l2_interposer.so \
+                      /usr/lib/selkies_v4l2_interposer.so; do
+        if [ -f "$INTERPOSER" ]; then
             export LD_PRELOAD="${LD_PRELOAD:+$LD_PRELOAD:}$INTERPOSER"
+            break
         fi
-        break
-    fi
-done
-
-# Keep downloaded models on the RunPod volume when one is mounted at /workspace.
-if [ -w /workspace ] && [ ! -e .assets ]; then
-    mkdir -p /workspace/facefusion-models
-    ln -s /workspace/facefusion-models .assets
+    done
 fi
 
 # Point the GPU runtime at the CUDA libraries installed in FaceFusion's venv
