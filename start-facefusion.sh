@@ -22,5 +22,9 @@ if [ -w /workspace ] && [ ! -e .assets ]; then
     ln -s /workspace/facefusion-models .assets
 fi
 
+# Listen on all interfaces so RunPod's port 7860 link can reach the web page.
+export GRADIO_SERVER_NAME="${GRADIO_SERVER_NAME:-0.0.0.0}"
+export GRADIO_SERVER_PORT="${GRADIO_SERVER_PORT:-7860}"
+
 . venv/bin/activate
 exec python facefusion.py run --execution-providers cuda --ui-layouts default webcam
